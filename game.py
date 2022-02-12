@@ -197,8 +197,35 @@ class Area:
     def getRoom(self):
         return self.currentRoom
         
-def genGob():
-    return Monster(np.random.rand(), 'Goblin', 10, 2, 8, 3, [Object("Goblin corpse", "JUNK", "The rotting corpse of a goblin", 5, "none", 0)])
+def genMob():
+    num = np.random.randint(0,5)
+    if num == 0:
+        return Monster(np.random.rand(), 'Goblin', 10, 2, 8, 3, [Object("Goblin corpse", "JUNK", "The rotting corpse of a goblin", 5, "none", 0), genItem()])
+    if num == 1:
+        return Monster(np.random.rand(), 'RatMan', 15, 2, 8, 5, [Object("Ratman corpse", "JUNK", "The rotting corpse of a ratman", 5, "none", 0), genItem()])
+    if num == 2:
+        return Monster(np.random.rand(), 'Basilisk', 20, 5, 12, 5, [Object("Basilisk corpse", "JUNK", "The rotting corpse of a basilisk", 50, "none", 0), genItem(), genItem(), genItem()])
+    if num == 3:
+        return Monster(np.random.rand(), 'Orc', 25, 2, 15, 3, [Object("Orc corpse", "JUNK", "The rotting corpse of an orc", 15, "none", 0), genItem(), genItem()])
+    if num == 4:
+        return Monster(np.random.rand(), 'Bandit', 15, 2, 8, 3, [Object("Bandit corpse", "JUNK", "The rotting corpse of a bandit", 15, "none", 0), genItem(), genItem()])
+
+def genItem():
+    num = np.random.randint(0,100)
+    if num > 0 and num < 20:
+        return Object("Potion", "CONSUMABLE", "An elixir of health", 10, "hp", 20)
+    if num > 20 and num < 40:
+        return Object("Elixir", "CONSUMABLE", "An elixir of mana", 10, "mp", 10)
+    if num > 40 and num < 45:
+        return Object("Bronze Helmet", "ARMOR", "An bronze helm", 100, "df", 10)
+    if num > 45 and num < 50:
+        return Object("Bronze Shield", "ARMOR", "A bronze shield", 100, "df", 5)
+    if num == 50:
+        return Object("Dagger of kill", "WEAPON", "A worn but sturdy blade", 500, "atk", 15)
+    if num == 51:
+        return Object("Bronze Sword", "WEAPON", "A worn but sturdy blade", 100, "atk", 10)
+    return Object("Junk", "JUNK", "Assorted scraps and debris", 0, "none", 0)
+
 
 def command(c, area, player):
     tokens = c.lower().split(" ")
@@ -216,9 +243,9 @@ def command(c, area, player):
             for i in area.currentRoom.objects:
                 if i.name.lower() == itemName:
                     player.get(i, area.currentRoom)
+                    return
             print("There is no " + itemName + " here")
             return
-        
     if (tokens[0] == 'pick' and len(tokens) > 1 and tokens[1] == 'up'):
         if len(tokens) > 2:
             itemName = tokens[2]
@@ -294,14 +321,15 @@ p = Player(name, 20, 10, 5, 5)
 p.inventory.append(Object("Potion", "CONSUMABLE", "An elixir of health", 10, "hp", 20))
 p.inventory.append(Object("Elixir", "CONSUMABLE", "An elixir of mana", 10, "mp", 10))
 p.inventory.append(Object("Sword", "WEAPON", "A worn but sturdy blade", 10, "atk", 5))
-p.inventory.append(Object("Dagger of kill", "WEAPON", "A worn but sturdy blade", 10, "atk", 5))
 p.inventory.append(Object("Breastplate", "ARMOR", "Shining bronze armor", 10, "df", 10))
 cls()
 print("Welcome, " + p.name + "...")
 print("...to the DUNGEN of KILL")
 playing = True
-area = Area([[Room("A nondescript room", [], []),Room("A nondescript room", [genGob()], [])],
-            [Room("A nondescript room", [genGob()], []),Room("A nondescript room", [], [])]])
+area = Area([[Room("A nondescript room", [], []),Room("A nondescript room", [genMob()], []),Room("A nondescript room", [], []),Room("A nondescript room", [], [])],
+            [Room("A nondescript room", [genMob()], []),Room("A nondescript room", [], []),Room("A nondescript room", [], []),Room("A nondescript room", [genMob()], [])],
+            [Room("A nondescript room", [], []),Room("A nondescript room", [genMob()], []),Room("A nondescript room", [], []),Room("A nondescript room", [], [])],
+            [Room("A nondescript room", [genMob()], []),Room("A nondescript room", [], []),Room("A nondescript room", [], []),Room("A nondescript room", [genMob()], [])]])
 area.setRoom(0,0)
 time.sleep(1)
 c = "skip"
