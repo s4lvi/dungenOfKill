@@ -148,9 +148,12 @@ class Room:
         self.description = description
         self.entities = entities
         self.objects = objects
+        self.exits = []
 
     def look(self):
         print(self.description)
+        for e in self.exits:
+            print("There is an exit to the " + e)
         if len(self.entities) > 0:
             for e in self.entities:
                 if e.isAlive():
@@ -190,12 +193,25 @@ class Area:
             print("Cannot go that way")
 
     def hasRoom(self, x, y):
-        if x >= 0 and y >= 0 and x < len(self.rooms) and y < len(self.rooms[0]) and self.rooms[x][y] != None:
+        if x >= 0 and y >= 0 and x < len(self.rooms) and y < len(self.rooms[x]) and self.rooms[x][y] != None:
             return True
         return False
 
     def getRoom(self):
         return self.currentRoom
+
+    def getExits(self):
+        for x in range(len(self.rooms)):
+            for y in range(len(self.rooms[x])):
+                if self.rooms[x][y] != None:
+                    if self.hasRoom(x,y-1):
+                        self.rooms[x][y].exits.append("n")
+                    if self.hasRoom(x,y+1):
+                        self.rooms[x][y].exits.append("s")
+                    if self.hasRoom(x-1,y):
+                        self.rooms[x][y].exits.append("w")
+                    if self.hasRoom(x+1,y):
+                        self.rooms[x][y].exits.append("e")
         
 def genMob():
     num = np.random.randint(0,5)
@@ -204,11 +220,11 @@ def genMob():
     if num == 1:
         return Monster(np.random.rand(), 'RatMan', 15, 2, 8, 5, [Object("Ratman corpse", "JUNK", "The rotting corpse of a ratman", 5, "none", 0), genItem()])
     if num == 2:
-        return Monster(np.random.rand(), 'Basilisk', 20, 5, 12, 5, [Object("Basilisk corpse", "JUNK", "The rotting corpse of a basilisk", 50, "none", 0), genItem(), genItem(), genItem()])
+        return Monster(np.random.rand(), 'Basilisk', 20, 5, 12, 5, [Object("Basilisk corpse", "JUNK", "The rotting corpse of a basilisk", 50, "none", 0), genItem(), genItem(), genItem(), genItem()])
     if num == 3:
         return Monster(np.random.rand(), 'Orc', 25, 2, 15, 3, [Object("Orc corpse", "JUNK", "The rotting corpse of an orc", 15, "none", 0), genItem(), genItem()])
     if num == 4:
-        return Monster(np.random.rand(), 'Bandit', 15, 2, 8, 3, [Object("Bandit corpse", "JUNK", "The rotting corpse of a bandit", 15, "none", 0), genItem(), genItem()])
+        return Monster(np.random.rand(), 'Bandit', 15, 2, 8, 3, [Object("Bandit corpse", "JUNK", "The rotting corpse of a bandit", 15, "none", 0), genItem(), genItem(), genItem()])
 
 def genItem():
     num = np.random.randint(0,100)
@@ -326,22 +342,45 @@ cls()
 print("Welcome, " + p.name + "...")
 print("...to the DUNGEN of KILL")
 playing = True
-area = Area([[Room("A nondescript room", [], []),Room("A nondescript room", [genMob()], []),Room("A nondescript room", [], []),Room("A nondescript room", [], [])],
-            [Room("A nondescript room", [genMob()], []),Room("A nondescript room", [], []),Room("A nondescript room", [], []),Room("A nondescript room", [genMob()], [])],
-            [Room("A nondescript room", [], []),Room("A nondescript room", [genMob()], []),Room("A nondescript room", [], []),Room("A nondescript room", [], [])],
-            [Room("A nondescript room", [genMob()], []),Room("A nondescript room", [], []),Room("A nondescript room", [], []),Room("A nondescript room", [genMob()], [])]])
+area = Area([[Room("A nondescript room", [], []),Room("A nondescript room", [genMob()], []),Room("A nondescript room", [], []),None,Room("A nondescript room", [], [])],
+            [None,Room("A nondescript room", [], []),Room("A nondescript room", [genMob()], []),None],
+            [Room("A nondescript room", [], []),Room("A nondescript room", [genMob()], []),None,Room("A nondescript room", [], []),Room("A nondescript room", [], [])],
+            [Room("A nondescript room", [genMob()], []),Room("A nondescript room", [], []),None,Room("A nondescript room", [], []),Room("A nondescript room", [genMob()], [])]])
 area.setRoom(0,0)
+area.getExits()
 time.sleep(1)
 c = "skip"
+
 while playing == True:
     cls()
     print("<<<<<<<<<DUNGEN OF KILL>>>>>>>>>>")
     print()
     command(c, area, p)
     area.currentRoom.cycle(p)
+    if (not p.isAlive()):
+        playing = False
+        break
     print(p.name + " | hp:" + str(p.hp) + "/" + str(p.maxHp) + " | mp:" + str(p.mp) + "/" + str(p.maxMp))
     print("---------------------------------")
     print("Enter command:")
     c = input()
     time.sleep(.5)
+cls()
+tText = p.name
+side = int((33 - len(tText)) / 2)
+filler = "-" * side
+tText = filler + tText + filler
+if len(tText) == 32:
+    tText = tText + "-"
+print("             -------             ")
+print("      ---------------------      ")
+print(" ------------------------------- ")
+print("------------Here Lies------------")
+print("---------------------------------")
+print(tText)
+print("---------------------------------")
+print("--------------R.I.P.-------------")
+print("---------------------------------")
+print("---------------------------------")
+
     
